@@ -34,9 +34,9 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 bool relayOn = false;
 bool ledOn = false;
 
-const char *ssid = "Surinlearninglab-2.4G";
-const char *password = "SurinLL2023";
-const char *serverAddress = "192.168.1.24";
+const char *ssid = "********";
+const char *password = "*-******";
+const char *serverAddress = "************";
 const int serverPort = 80;
 
 unsigned long startTime;

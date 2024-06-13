@@ -5,6 +5,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+// OLED display settings
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
@@ -27,18 +28,17 @@ const int thermoDO = 19;
 const int thermoCS = 23;
 const int thermoCLK = 5;
 int relayPin = 12;
-int led = 26;
 
 MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 
 bool relayOn = false;
-bool ledOn = false;
 
-const char *ssid = "********";
-const char *password = "*-******";
-const char *serverAddress = "************";
-const int serverPort = 80;
+// Multiple SSIDs and passwords
+const char* ssids[] = {"Galaxy A32E945", "Surinlearninglab-2.4G"};
+const char* passwords[] = {"xwtt3718", "SurinLL2023"};
+const int numNetworks = sizeof(ssids) / sizeof(ssids[0]);
 
+double celsius = 0;
 unsigned long startTime;
 unsigned long elapsedTime = 0;
 
@@ -47,23 +47,24 @@ void setup() {
 
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ;
+    for (;;);
   }
 
   connectToWiFi();
 
   delay(1000);
   pinMode(relayPin, OUTPUT);
-  pinMode(led, OUTPUT);
 
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
-  myservo.setPeriodHertz(50);
-  myservo.attach(servoPin, 1000, 2400);
+  myservo.setPeriodHertz(50); // Set servo frequency
+  myservo.attach(servoPin, 1000, 2400); // Attach servo with min and max pulse widths
+
   startTime = millis(); // initialize the start time
+
+  setupWebServer();
 }
 
 void loop() {
@@ -77,7 +78,7 @@ void loop() {
     if (isTemperatureDisplay) {
       displayDuration = TEMPERATURE_DISPLAY_TIME;
 
-      double celsius = thermocouple.readCelsius();
+      celsius = thermocouple.readCelsius();
       double fahrenheit = thermocouple.readFahrenheit();
 
       if (!isnan(celsius) && !isnan(fahrenheit)) {
@@ -89,20 +90,18 @@ void loop() {
         if (celsius >= 26.50 && !relayOn) {
           digitalWrite(relayPin, HIGH);
           relayOn = true;
-          digitalWrite(led, HIGH);
-          ledOn = true;
 
-          
-          for (pos = 0; pos <= 70; pos += 1){
+          // Move servo to 70 degrees
+          for (pos = 0; pos <= 70; pos += 1) {
             myservo.write(pos);
             delay(5);
           }
         } else if (celsius < 26.00 && relayOn) {
           digitalWrite(relayPin, LOW);
           relayOn = false;
-          digitalWrite(led, LOW);
-          ledOn = false;
-           for (pos = 70; pos >= 0; pos -= 1) {
+
+          // Move servo back to 0 degrees
+          for (pos = 70; pos >= 0; pos -= 1) {
             myservo.write(pos);
             delay(5);
           }
@@ -116,8 +115,6 @@ void loop() {
         display.setCursor(10, 32);
         display.print(celsius);
         display.display();
-
-        sendDataToServer(celsius);
       } else {
         Serial.println("Error reading temperature. Check wiring and sensor.");
       }
@@ -151,67 +148,32 @@ void loop() {
     }
   }
 
-  // Your existing delay(2000)
+  loopWebServer();
   delay(2000);
 }
 
 void connectToWiFi() {
   Serial.println("Connecting to WiFi");
-  WiFi.begin(ssid, password);
 
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-    delay(1000);
-    Serial.println("Connecting to WiFi...");
-    attempts++;
-  }
+  for (int i = 0; i < numNetworks; i++) {
+    WiFi.begin(ssids[i], passwords[i]);
 
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("Connected to WiFi");
-    Serial.print("Local IP address: ");
-    Serial.println(WiFi.localIP());
-  } else {
-    Serial.println("Failed to connect to WiFi. Check credentials and try again.");
-  }
-}
-
-void sendDataToServer(double temperature) {
-  WiFiClient client;
-
-  if (client.connect(serverAddress, serverPort)) {
-    Serial.println("Connected to the server");
-
-    char url[100];
-    snprintf(url, sizeof(url), "/update?temp=%.2f", temperature);
-
-    Serial.println("HTTP Request:");
-    Serial.print("GET ");
-    Serial.print(url);
-    Serial.println(" HTTP/1.1");
-    Serial.print("Host: ");
-    Serial.println(serverAddress);
-    Serial.println("Connection: close\r\n\r\n");
-
-    client.print("GET ");
-    client.print(url);
-    client.print(" HTTP/1.1\r\n");
-    client.print("Host: ");
-    client.print(serverAddress);
-    client.print("\r\n");
-    client.print("Connection: close\r\n\r\n");
-
-    Serial.println("Server Response:");
-    while (client.connected()) {
-      if (client.available()) {
-        String line = client.readStringUntil('\r');
-        Serial.print(line);
-      }
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+      delay(1000);
+      Serial.println(String("Connecting to ") + ssids[i] + "...");
+      attempts++;
     }
 
-    client.stop();
-    Serial.println("Connection closed");
-  } else {
-    Serial.println("Unable to connect to the server");
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println(String("Connected to ") + ssids[i]);
+      Serial.print("Local IP address: ");
+      Serial.println(WiFi.localIP());
+      return; // Exit the function once connected
+    } else {
+      Serial.println(String("Failed to connect to ") + ssids[i]);
+    }
   }
+  
+  Serial.println("Failed to connect to any Wi-Fi network. Check credentials and try again.");
 }
-

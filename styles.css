@@ -1,0 +1,38 @@
+body {
+    background-color: #875856;
+}
+
+.header {
+    display: grid;
+   /* grid-template-columns: 160px 160px;*/
+    justify-content: center;
+    align-content: center;
+    
+}
+
+p {
+    font-weight: bold;
+}
+
+.time {
+    display: grid;
+   /* grid-template-columns: 160px 160px;*/
+    font-size: 25px;
+    background-color: antiquewhite;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.temp {
+    display: grid;
+   /* grid-template-columns: 160px 160px;*/
+    font-size: 25px;
+    background-color: antiquewhite;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h1 {
+    padding: 40px;
+    background-color: darkkhaki;
+}

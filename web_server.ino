@@ -1,11 +1,10 @@
 #include <WebServer.h>
 
-// Use the same external arrays for SSIDs and passwords
-extern const char* ssids[];
-extern const char* passwords[];
+// Variables defined in main_sketch.ino
 extern double celsius;
 extern unsigned long elapsedTime;
 
+// Web server instance
 WebServer server(80);
 
 void setupWebServer() {
@@ -17,6 +16,7 @@ void setupWebServer() {
 
 void handleRoot() {
   char buffer[2048];
+  double fahrenheit = celsius * 9.0 / 5.0 + 32.0;
   snprintf(buffer, sizeof(buffer), 
     "<!DOCTYPE html>"
     "<html lang=\"en\">"
@@ -36,18 +36,20 @@ void handleRoot() {
     "<div>"
     "<h1>ESP32 Temperature and Time</h1>"
     "<p class=\"temp\">Temperature: %.2f &#8451;</p>"
+    "<p class=\"temp\">Temperature: %.2f &#8457;</p>"
     "<p class=\"time\">Time: %02lu:%02lu</p>"
     "</div>"
     "</body>"
     "</html>", 
-    celsius, (elapsedTime / (60 * 60 * 1000)), (elapsedTime / (60 * 1000)) % 60);
+    celsius, fahrenheit, (elapsedTime / (60 * 60 * 1000)), (elapsedTime / (60 * 1000)) % 60);
 
   server.send(200, "text/html", buffer);
 }
 
 void handleTemp() {
-  char buffer[32];
-  snprintf(buffer, sizeof(buffer), "%.2f", celsius);
+  char buffer[64];
+  double fahrenheit = celsius * 9.0 / 5.0 + 32.0;
+  snprintf(buffer, sizeof(buffer), "Celsius: %.2f, Fahrenheit: %.2f", celsius, fahrenheit);
   server.send(200, "text/plain", buffer);
 }
 

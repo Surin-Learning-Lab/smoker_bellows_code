@@ -58,6 +58,8 @@ Control Logic: Adjust the temperature thresholds and control parameters in the s
 Contributing
 Contributions to this project are welcome! Feel free to fork the repository and submit pull requests. You can also open issues for bugs or feature requests.
 
+The smoker bellos 3d design is specific for my smoker. If you would like the file contact me and will send the files required to print or redesign.
+
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 

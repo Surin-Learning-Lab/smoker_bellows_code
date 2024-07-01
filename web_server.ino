@@ -1,3 +1,5 @@
+// include this sketch in a seperate tab in your smoker_belows.ino sketch
+
 #include <WebServer.h>
 
 // Variables defined in main_sketch.ino

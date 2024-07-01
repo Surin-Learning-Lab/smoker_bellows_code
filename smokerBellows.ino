@@ -41,9 +41,9 @@ MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
 
 bool relayOn = false;
 
-// Multiple SSIDs and passwords
-const char* ssids[] = {"Galaxy A32E945", "Surinlearninglab-2.4G"};
-const char* passwords[] = {"xwtt3718", "SurinLL2023"};
+// Multiple SSIDs and passwords. I use multiple SSID's so i can test the system on my home wifi and then use my phone as a hotspot when using the smoker.
+const char* ssids[] = {"*******", "********"};
+const char* passwords[] = {"******", "*******"};
 const int numNetworks = sizeof(ssids) / sizeof(ssids[0]);
 
 double celsius = 0;

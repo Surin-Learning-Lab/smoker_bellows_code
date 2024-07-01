@@ -1,4 +1,4 @@
-// include this sketch in a seperate tab in your smoker_belows.ino sketch
+// include this sketch in a seperate tab in your smokerBelows.ino sketch
 
 #include <WebServer.h>
 
